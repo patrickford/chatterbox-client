@@ -1,7 +1,7 @@
 $(document).ready( function(){
 
   var messages = [];
-  var parseURL = 'https://api.parse.com/1/classes/chatterbox';
+  var parseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
 
 // Toggles the disabled attribute of the send button upon text entry into draft
   $('#draft').keyup(function(){
@@ -16,9 +16,11 @@ $(document).ready( function(){
 // Saves text value, uses send func, clears text, disables button
   var sendClearDisable = function(){
     var textVal = $('#draft').val();
-    sendMessage(textVal);
-    $('#draft').val('');
-    $('.send').attr('disabled', true);
+    if(textVal.length>0){
+      sendMessage(textVal);
+      $('#draft').val('');
+      $('.send').attr('disabled', true);
+    }
   };
 
   //on pressing enter
@@ -33,14 +35,15 @@ $(document).ready( function(){
     sendClearDisable();
   });
 
-  var refreshMessages = function(messages) {
-    getMessages();
-    console.log(messages);
+  var drawMessages = function() {
+    $('.allMessages').empty();
+    for (var i = 0; i < messages.length; i++) {
+      $('.allMessages').append('<li> <b>' + _.escape(messages[i].username) + '</b>' + ': ' + _.escape(messages[i].text) + '</li>');
+    }
   };
 
   var sendMessage = function(message) {
     var username = window.location.search.slice(10);
-
     var messageObj = {};
     messageObj.username = username;
     messageObj.text = message;
@@ -58,62 +61,23 @@ $(document).ready( function(){
         console.error('Chatterbox: Failed to send message');
       }
     });
+    getMessages();
   };
 
   var getMessages = function() {
     // var returnedMessages;
-    $.ajax('https://api.parse.com/1/classes/chatterbox?order=-createdAt',{
+    $.ajax(parseURL,{
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
-        messages.push(data.results);
-        // refreshMessages(data);
+        messages = data.results;
+        drawMessages();
       }
     });
-    // console.log("From getMessages, returnedMessages =" + returnedMessages);
-    // return returnedMessages;
   };
 
-  // var chatSend = function(stuff){
-  //   sentObj = {};
-  //   sentObj['text'] = stuff;
-  //   $.ajax('https://api.parse.com/1/classes/chats', {
-  //     type: "POST",
-  //     data : JSON.stringify(sentObj),
-  //     success:function(data){
-  //       console.log("message sent");
-  //     }
-  //   });
-  //   // fetch(display);
-  // };
-
-  // var displayMessages = function(data){
-  //   if(initiate > 0){
-  //     $('.allMessages').append($('<li>').append(data.results[90].text));
-  //   } else {
-  //     _.each(data, function(val, x){
-  //       _.each(val, function(msg){
-  //         $('.allMessages').append($('<li>').append(msg.text));
-  //         console.log(msg.text);
-  //       });
-  //     });
-  //   }
-  //   initiate += 1;
-  //   latestId = data.results[0].objectId;
-  //   if($('ul.messages li').length > 10){
-  //     $('.messages li').first().remove();
-  //   }
-  // };
-
-
-
-  // setInterval(function(){
-  //   $.ajax('https://api.parse.com/1/classes/chatterbox', {
-  //     success: function(data) {
-  //       console.log(data);
-  //     }
-  //   });
-  // },2000);
-  refreshMessages();
-  setInterval(refreshMessages(), 3000);
+  getMessages();
+  setInterval(function(){
+    getMessages();
+  },2000);
 });

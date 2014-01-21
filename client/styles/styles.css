@@ -5,11 +5,11 @@ body {
 }
 
 #main {
-    width: 500px;
+    width: 700px;
     margin: auto;
     text-align: left;
     background: white;
-    padding: 50px 60px;
+    padding: 10px 10px;
     border: solid #ddd;
     border-width: 0 1px 1px 1px;
 }
@@ -20,5 +20,8 @@ body {
 }
 
 .allMessages {
-    
+    width: 700px;
+    margin: auto;
+    text-align: left;
+    list-style-type: none;
 }
