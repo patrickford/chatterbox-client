@@ -40,12 +40,12 @@ $(document).ready( function(){
   });
 
   $('form').on('change',function(){
-    console.log("clicked");
     console.log($('#rooms').val());
     selectRoom();
   });
 
   var getRoomnames = function(){
+    rooms = {};
     for (var i = 0; i < messages.length; i++) {
       var currentRoomname = _.escape(messages[i].roomname);
       if (!rooms.hasOwnProperty(currentRoomname)&&currentRoomname) {
@@ -61,7 +61,8 @@ $(document).ready( function(){
       parseURL = baseURL;
     } else {
       var theRoom = $('#rooms').val();
-      parseURL = baseURL + '&where{"roomname:"' + '"'+theRoom+'}';
+      parseURL = baseURL + '&where={"roomname"'+':' + '"'+theRoom+ '"}';
+      console.log(parseURL);
     }
     getMessages();
   };
@@ -78,7 +79,7 @@ $(document).ready( function(){
     var messageObj = {};
     messageObj.username = username;
     messageObj.text = message;
-    messageObj.roomname = "lobby";
+    messageObj.roomname = $('#rooms').val();
 
     $.ajax({
       url: parseURL,
