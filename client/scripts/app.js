@@ -2,7 +2,8 @@ $(document).ready( function(){
 
   var messages = [];
   var rooms = {};
-  var parseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
+  var baseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
+  var parseURL = baseURL;
 
 // Toggles the disabled attribute of the send button upon text entry into draft
   $('#draft').keyup(function(){
@@ -24,7 +25,9 @@ $(document).ready( function(){
     }
   };
 
-  //on pressing enter
+  //on pressing enter      <h1>Chat-Client</h1>
+
+
   $('#draft').keypress(function(Q){
     if(Q.which == 13){
       sendClearDisable();
@@ -36,13 +39,36 @@ $(document).ready( function(){
     sendClearDisable();
   });
 
+  $('form').on('change',function(){
+    console.log("clicked");
+    console.log($('#rooms').val());
+    selectRoom();
+  });
+
+  var getRoomnames = function(){
+    for (var i = 0; i < messages.length; i++) {
+      var currentRoomname = _.escape(messages[i].roomname);
+      if (!rooms.hasOwnProperty(currentRoomname)&&currentRoomname) {
+        rooms[currentRoomname] = 1;
+        $('#rooms').append('<option value=' + currentRoomname + '>' + currentRoomname + '</option>');
+        console.log($('#rooms').val());
+      }
+    }
+  };
+
+  var selectRoom = function(){
+    if ($('#rooms').val() === "all") {
+      parseURL = baseURL;
+    } else {
+      var theRoom = $('#rooms').val();
+      parseURL = baseURL + '&where{"roomname:"' + '"'+theRoom+'}';
+    }
+    getMessages();
+  };
+
   var drawMessages = function() {
     $('.allMessages').empty();
     for (var i = 0; i < messages.length; i++) {
-      if (!rooms.hasOwnProperty(messages[i].roomname)) {
-        rooms[messages[i].roomname]=1;
-        $('#rooms').append('<option value=' + messages[i].roomname + '>' + messages[i].roomname + '</option>');
-    }
       $('.allMessages').append('<li> <b>' + _.escape(messages[i].username) + '</b>' + ': ' + _.escape(messages[i].text) + '</li>');
     }
   };
@@ -76,6 +102,7 @@ $(document).ready( function(){
       contentType: 'application/json',
       success: function(data){
         messages = data.results;
+        getRoomnames();
         drawMessages();
       }
     });
