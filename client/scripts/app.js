@@ -1,6 +1,7 @@
 $(document).ready( function(){
 
   var messages = [];
+  var rooms = {};
   var parseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
 
 // Toggles the disabled attribute of the send button upon text entry into draft
@@ -38,6 +39,10 @@ $(document).ready( function(){
   var drawMessages = function() {
     $('.allMessages').empty();
     for (var i = 0; i < messages.length; i++) {
+      if (!rooms.hasOwnProperty(messages[i].roomname)) {
+        rooms[messages[i].roomname]=1;
+        $('#rooms').append('<option value=' + messages[i].roomname + '>' + messages[i].roomname + '</option>');
+    }
       $('.allMessages').append('<li> <b>' + _.escape(messages[i].username) + '</b>' + ': ' + _.escape(messages[i].text) + '</li>');
     }
   };
