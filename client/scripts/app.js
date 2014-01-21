@@ -15,6 +15,15 @@ $(document).ready( function(){
     }
   });
 
+  $('#newRoom').keyup(function(){
+    if($(this).val().length !== 0){
+      $('.createRoom').attr('disabled', false);
+    }
+    else{
+      $('.createRoom').attr('disabled', true);
+    }
+  });
+
 // Saves text value, uses send func, clears text, disables button
   var sendClearDisable = function(){
     var textVal = $('#draft').val();
@@ -25,12 +34,27 @@ $(document).ready( function(){
     }
   };
 
-  //on pressing enter      <h1>Chat-Client</h1>
+  var setRoomClearDisable = function(){
+    var newRoomName = $('#newRoom').val();
+    if(newRoomName.length>0){
+      rooms[newRoomName]=1;
+      $('#rooms').append('<option value=' + newRoomName + '>' + newRoomName + '</option>');
+      $('#rooms').val(newRoomName);
+      $('#newRoom').val('');
+      $('.createRoom').attr('disabled', true);
+    }
+  };
 
-
+  //on pressing enter
   $('#draft').keypress(function(Q){
     if(Q.which == 13){
       sendClearDisable();
+    }
+  });
+
+  $('#newRoom').keypress(function(Q){
+    if(Q.which == 13){
+      setRoomClearDisable();
     }
   });
 
@@ -39,30 +63,30 @@ $(document).ready( function(){
     sendClearDisable();
   });
 
+  $('.createRoom').click(function(){
+    setRoomClearDisable();
+  });
+
   $('form').on('change',function(){
-    console.log($('#rooms').val());
     selectRoom();
   });
 
   var getRoomnames = function(){
-    rooms = {};
     for (var i = 0; i < messages.length; i++) {
       var currentRoomname = _.escape(messages[i].roomname);
       if (!rooms.hasOwnProperty(currentRoomname)&&currentRoomname) {
         rooms[currentRoomname] = 1;
         $('#rooms').append('<option value=' + currentRoomname + '>' + currentRoomname + '</option>');
-        console.log($('#rooms').val());
       }
     }
   };
 
   var selectRoom = function(){
-    if ($('#rooms').val() === "all") {
+    if ($('#rooms').val() === "All Rooms") {
       parseURL = baseURL;
     } else {
       var theRoom = $('#rooms').val();
       parseURL = baseURL + '&where={"roomname"'+':' + '"'+theRoom+ '"}';
-      console.log(parseURL);
     }
     getMessages();
   };
@@ -74,7 +98,7 @@ $(document).ready( function(){
     }
   };
 
-  var sendMessage = function(message) {
+  var sendMessage = function(message, room) {
     var username = window.location.search.slice(10);
     var messageObj = {};
     messageObj.username = username;
